@@ -1,0 +1,25 @@
+# コンパイル後のクラスファイル
+*.class
+
+# ビルドディレクトリ
+/build/
+
+# Eclipseの設定ファイル
+.project
+.classpath
+.settings/
+
+# XAMPPなどのローカル環境ファイル（あれば）
+*.log
+*.tmp
+
+# OS固有のファイル
+.DS_Store
+Thumbs.db
+
+# 実行時に生成されるファイル
+*.war
+*.jar
+
+# DB接続などの個人用設定ファイル
+src/config/DBConnect.java
