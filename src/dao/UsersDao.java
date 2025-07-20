@@ -48,6 +48,29 @@ public class UsersDao {
 		return list;
 	}
 	
+	//新規登録用
+	public int insertUser(Users user) {
+		int result = 0;
+		String sql = "INSERT INTO users (user_name, tel, city_id) VALUES (?,?,?)";
+		
+		try (Connection conn = DBConnect.getConnection();
+			 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			
+			pstmt.setString(1,  user.getName());
+			pstmt.setString(2,  user.getTel());
+			pstmt.setInt(3,  user.getCityId());
+			
+			result = pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.err.println("SQLエラー: " + e.getMessage());
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+			System.err.println("クラスが見つかりません: " + e1.getMessage());
+		}
+		return result;
+	}
+	
 	//更新フォームでIDごとの情報表示する用
 	public static Users getUserById(int userId) {
 		Users user = null;
@@ -82,30 +105,7 @@ public class UsersDao {
 		return user;
 	}
 	
-	//新規登録用
-	public int insertUser(Users user) {
-		int result = 0;
-		String sql = "INSERT INTO users (user_name, tel, city_id) VALUES (?,?,?)";
-		
-		try (Connection conn = DBConnect.getConnection();
-			 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			
-			pstmt.setString(1,  user.getName());
-			pstmt.setString(2,  user.getTel());
-			pstmt.setInt(3,  user.getCityId());
-			
-			result = pstmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			System.err.println("SQLエラー: " + e.getMessage());
-		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-			System.err.println("クラスが見つかりません: " + e1.getMessage());
-		}
-		return result;
-	}
-	
-	//更新用
+	//更新処理用
 	public static int updateUser(Users user) {
 		int result = 0;
 		String sql = "UPDATE users SET user_name = ?, tel = ?, city_id = ? WHERE user_id = ?";
@@ -123,6 +123,41 @@ public class UsersDao {
 			e.printStackTrace();
 		}
 		return result;
+	}
+	
+	//更新後の表示用
+	public static Users getUpdatedUserById(int userId) {
+		Users user = null;
+		String sql = """
+				SELECT
+					u.user_id AS userId,
+					u.user_name AS name,
+					CONCAT(p.pref_name, c.city_name) AS address,
+					u.tel AS tel
+				FROM users u
+				JOIN cities c ON u.city_id = c.city_id
+				JOIN prefectures p ON c.pref_id = p.pref_id
+				WHERE u.user_id = ?
+				""";
+		
+		try (Connection conn = DBConnect.getConnection();
+				 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+				
+				pstmt.setInt(1,  userId);
+				try(ResultSet rs = pstmt.executeQuery()) {
+					if (rs.next()) {
+						user = new Users();
+						user.setUserId(rs.getInt("userId"));
+						user.setName(rs.getString("name"));
+						user.setAddress(rs.getString("address"));
+						user.setTel(rs.getString("tel"));
+					}
+				}
+				
+		} catch (SQLException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			return user;
 	}
 	
 	//削除用

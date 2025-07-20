@@ -14,21 +14,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/Update")
 public class Update extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		//一時メッセージがあれば表示
-		HttpSession session = request.getSession();
-		String message = (String) session.getAttribute("message");
-		if (message != null) {
-			request.setAttribute("message",message);
-			session.removeAttribute("message"); //一度表示したら削除
-		}
 		
 		// 前ページからデータを受け取る
         String userIdStr = request.getParameter("userId");
@@ -117,21 +108,26 @@ public class Update extends HttpServlet {
             return;
         }
         
-		if(userResult > 0) {
-			request.setAttribute("message", "変更が完了しました！");
+        if (userResult > 0) {
+        	//更新後のユーザー情報を再取得
+        	Users updatedUser = UsersDao.getUpdatedUserById(userId);
+        	
+        	//JSPで使えるようにリクエストに設定
+        	request.setAttribute("user", updatedUser);
+        	
+        	//成功画面にフォワード
+			request.getRequestDispatcher("/view/success_update.jsp").forward(request, response);
+			
+			//System.out.println("DEBUG: updateUser result = " + userResult); //デバッグ用
+			
+			return;
 		} else {
-			request.setAttribute("message","変更に失敗しました。");
-		}
-		
-		//更新処理の結果に応じてメッセージをセッションに一時保存
-		HttpSession session = request.getSession();
-		if (userResult > 0) {
-			session.setAttribute("message", "変更が完了しました！");
-		} else {
-			session.setAttribute("message", "変更に失敗しました。");
-		}
-		
-		//GETにリダイレクト（メッセージ表示用）
-		response.sendRedirect(request.getContextPath() + "/Update?userId=" + userId);
-		}
+			//更新失敗でエラーメッセージを表示
+			request.setAttribute("message", "更新に失敗しました。");
+			
+			request.getRequestDispatcher("/view/update.jsp").forward(request,  response);
+			return;
+		}	
+        
 	}
+}

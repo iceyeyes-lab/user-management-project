@@ -35,15 +35,19 @@ user-management-prject/
 |    └WEB-INF
 |    |   └lib
 |    |       └mysql-connector-j-9.2.0.jar
+|    |       └jakarta.servlet.jsp.jstl-3.0.0.jar
+|    |       └jakarta.servlet.jsp.jstl-api-3.0.0.jar
 |    └view/
 |    |   └info_table.jsp
 |    |   └form.jsp
 |    |   └update.jsp
 |    |   └delete.jsp
 |    |   └success_delete.jsp
+|    |   └success_update.jsp
 |    └js/
 |        └address_select.js
 └README.md
+└CHANGELOG.md
 ```
 ## データベース
  テーブル：users, prefectures, cities
